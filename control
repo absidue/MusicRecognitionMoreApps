@@ -1,0 +1,23 @@
+Package: me.absidue.musicrecognitionmoreapps
+Name: MusicRecognitionMoreApps
+Version: 1.0
+Depends: firmware (>= 14.0), mobilesubstrate (>= 0.9.5000)
+Architecture: iphoneos-arm
+Description: Open Music Recognition results in more apps
+ Open Music Recognition results in more apps.
+ Automatically detects which apps you have installed and shows the relevant apps.
+ .
+ Currently supported apps:
+ - YouTube
+ - YouTube Music
+ - Spotify
+ - Deezer
+ .
+ If your music app is not supported yet, please open an issue or pull request on the GitHub page.
+ .
+ No options to configure.
+Maintainer: absidue
+Author: absidue
+Section: Tweaks
+Homepage: https://github.com/absidue/MusicRecognitionMoreApps/
+Tag: compatible_min::ios14.0
