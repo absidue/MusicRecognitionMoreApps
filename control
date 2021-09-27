@@ -1,6 +1,6 @@
 Package: me.absidue.musicrecognitionmoreapps
 Name: MusicRecognitionMoreApps
-Version: 1.0
+Version: 1.0.1
 Depends: firmware (>= 14.0), mobilesubstrate (>= 0.9.5000)
 Architecture: iphoneos-arm
 Description: Open Music Recognition results in more apps

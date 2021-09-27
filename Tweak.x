@@ -30,6 +30,7 @@ typedef NS_ENUM(short, MRMAEncoding) {
 NSString *titleFormat;
 NSDictionary *supportedApps;
 NSMutableDictionary *availableApplications;
+BOOL checkedInstalledApps;
 
 
 %hook SHNotificationViewController
@@ -37,16 +38,20 @@ NSMutableDictionary *availableApplications;
 - (void)didReceiveNotification:(UNNotification *)notification {
 	%orig;
 
-	[availableApplications removeAllObjects];
+	if (!checkedInstalledApps) {
+		[availableApplications removeAllObjects];
 
-	LSApplicationWorkspace *workspace = [LSApplicationWorkspace defaultWorkspace];
+		LSApplicationWorkspace *workspace = [LSApplicationWorkspace defaultWorkspace];
 
-	for (NSString *appId in supportedApps) {
-		NSDictionary *app = supportedApps[appId];
-		NSArray *available = [workspace applicationsAvailableForHandlingURLScheme:app[@"scheme"]];
-		if (available.count != 0) {
-			availableApplications[appId] = app;
+		for (NSString *appId in supportedApps) {
+			NSDictionary *app = supportedApps[appId];
+			NSArray *available = [workspace applicationsAvailableForHandlingURLScheme:app[@"scheme"]];
+			if (available.count != 0) {
+				availableApplications[appId] = app;
+			}
 		}
+
+		checkedInstalledApps = YES;
 	}
 
 	EXExtensionContextImplementation *context = (EXExtensionContextImplementation *)self.extensionContext;
@@ -87,13 +92,19 @@ NSMutableDictionary *availableApplications;
 				query = [query stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet.URLPathAllowedCharacterSet];
 			}
 
-			NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:app[@"url"], query]];
-			[self.extensionContext openURL:url completionHandler:nil];
+			__block NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:app[@"url"], query]];
+			[self.extensionContext openURL:url completionHandler:^(BOOL success) {
+				if (!success) {
+					[self.extensionContext openURL:url completionHandler:nil];
+				}
+			}];
 
 			ourAction = YES;
 			break;
 		}
 	}
+
+	checkedInstalledApps = NO;
 
 	if (ourAction) {
 		completion(UNNotificationContentExtensionResponseOptionDismiss);
@@ -144,7 +155,7 @@ NSMutableDictionary *availableApplications;
 		}
 
 		if (!appleMusicTitle || ![titleFormat containsString:@"%@"]) {
-			titleFormat = @"Listen dsadon %@";
+			titleFormat = @"Listen on %@";
 		}
 
 		%init;
